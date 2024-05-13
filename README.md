@@ -1,4 +1,4 @@
-# Piggy Bank pro
+# Dollar Builder
 
 ##  Description: An app that lets you save money by investing it into your own personal savings. It will put in an amount of money set aside based on how much the user made in a month or by weekly.
 
@@ -8,7 +8,7 @@
 
 ## User Story:
 
-### Piggy's Bank
+### Builder Bank
 - As a User who has money to be saved,
 - I want to add my money to a Saving database,
 - So that I can save my money for my future needs
