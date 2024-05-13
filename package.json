@@ -1,5 +1,5 @@
 {
-    "name": "3-musketeers",
+    "name": "solo-duo",
     "version": "1.0.0",
     "description": "Personal Budget Tracker Application",
     "main": "server.js",
@@ -12,12 +12,7 @@
     },
     "author": "",
     "license": "ISC",
-    "dependencies": {
-        "apollo-server-express": "^2.19.0",
-        "concurrently": "^8.2.2",
-        "express": "^4.17.1",
-        "graphql": "^15.5.0",
-        "jsonwebtoken": "^9.0.2",
-        "mongoose": "^5.11.15"
+    "devDependencies": {
+        "concurrently": "^8.2.2"
     }
 }

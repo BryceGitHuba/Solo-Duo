@@ -1,39 +1,40 @@
 const express = require('express');
-const { ApolloServer } = require('apollo-server-express');
-const { typeDefs } = require('./graphql/schema');
-const { resolvers } = require('./graphql/resolvers');
-const connectDB = require('./config/db'); // Import connectDB function
+const { ApolloServer } = require('@apollo/server');
+const path = require('path');
+const {expressMiddleware} = require('@apollo/server/express4');
+const { typeDefs, resolvers } = require('./schemas');
+const db = require('./config/connection');
 
+const PORT = process.env.PORT || 3001;
 const app = express();
-const PORT = process.env.PORT || 4000;
 
-// Connect to MongoDB with the external function for cleaner code
-connectDB().then(() => {
-    console.log('MongoDB connected successfully');
-}).catch(err => {
-    console.error('MongoDB connection error:', err.message);
-    process.exit(1); // Exit if the database connection fails
+const server = new ApolloServer({
+  typeDefs,
+  resolvers
 });
 
-// Middleware to parse JSON bodies must be placed before any routes that will handle JSON
-app.use(express.json());
+const startApolloServer = async () => {
+  await server.start();
+  app.use(express.urlencoded({ extended: true }));
+  app.use(express.json());
 
-// Import routes
-const authRoutes = require('./routes/authRoutes');
-const TransactionRoutes = require('./routes/transactionRoutes'); // Assuming you have transaction routes
+app.use('/graphql', expressMiddleware(server))
 
-// Use routes
-app.use('/api/auth', authRoutes);
-app.use('/api/transactions', TransactionRoutes); // Apply transaction routes
+  // Serve client assets if in production
+  if (process.env.NODE_ENV === 'production') {
+    app.use(express.static(path.join(__dirname, '../client/dist')));
 
-// Setup Apollo Server
-const server = new ApolloServer({ typeDefs, resolvers });
+    app.get('*', (req, res) => {
+      res.sendFile(path.join(__dirname, '../client/dist/index.html'));
+    });
+  }
 
-// Apply Apollo GraphQL middleware and set the path to /graphql
-server.applyMiddleware({ app, path: '/graphql' });
+  db.once('open', () => {
+    app.listen(PORT, () => {
+      console.log(`API server running on port ${PORT}!`);
+      console.log(`GraphQL available at http://localhost:${PORT}/graphql`);
+    });
+  });
+};
 
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
-  console.log(`GraphQL ready at http://localhost:${PORT}${server.graphqlPath}`);
-});
+startApolloServer();

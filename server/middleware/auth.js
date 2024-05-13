@@ -1,22 +1,17 @@
+const { GraphQLError } = require('graphql');
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
 
-const auth = async (req, res, next) => {
-    try {
-        const token = req.header('Authorization').replace('Bearer ', '');
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await User.findOne({ _id: decoded.userId, 'tokens.token': token });
+const secret = 'mysecretssshhhhhhh';
+const expiration = '2h';
 
-        if (!user) {
-            throw new Error();
-        }
-
-        req.token = token;
-        req.user = user;
-        next();
-    } catch (error) {
-        res.status(401).send({ error: 'Please authenticate.' });
-    }
+module.exports = {
+  AuthenticationError: new GraphQLError('Could not authenticate user.', {
+    extensions: {
+      code: 'UNAUTHENTICATED',
+    },
+  }),
+  signToken: function ({ email, name, _id }) {
+    const payload = { email, name, _id };
+    return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
+  },
 };
-
-module.exports = auth;
